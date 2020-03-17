@@ -11,31 +11,11 @@ from sklearn.model_selection import train_test_split
 from torch import nn
 import torch.nn.functional as F
 
-class Net(nn.Module):
-    def __init__(self):
-        super(Net, self).__init__()
-    def forward(self, x):
-        return x
-
-class Net(nn.Module):
-    def __init__(self):
-        super(Net, self).__init__()
-        # nn.Conv2d(input_channel, out_channel, kernel, stride, padding)
-        self.conv1 = nn.Conv2d(1, 6, kernel_size=5)     #6@24x24
-        self.conv2 = nn.Conv2d(6, 16, kernel_size=3)    #16@10x10
-        self.fc1 = nn.Linear(400, 320)
-        self.fc2 = nn.Linear(320, 10)
-    def forward(self, x):
-        x = F.relu(F.max_pool2d(self.conv1(x), 2))      #6@12x12
-        x = F.relu(F.max_pool2d(self.conv2(x), 2))      #16@5x5
-        #print(x.shape)
-        x = x.view(-1, 400)
-        x = F.relu(self.fc1(x))
-        x = self.fc2(x)
-        return F.log_softmax(x, dim=1)
-
 #デバイスの設定
-device = "cpu" #torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = "cpu"
+
+#GPUを使用する場合は下記を実行
+#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # 画像の読み込みと正規化
 X, y = fetch_openml('mnist_784', version=1, return_X_y=True)
@@ -68,6 +48,22 @@ ds_test = TensorDataset(X_test, y_test)
 loader_train = DataLoader(ds_train, batch_size=64, shuffle=True)
 loader_test = DataLoader(ds_test, batch_size=64, shuffle=False)
 
+class Net(nn.Module):
+    def __init__(self):
+        super(Net, self).__init__()
+        # nn.Conv2d(input_channel, out_channel, kernel, stride, padding)
+        self.conv1 = nn.Conv2d(1, 6, kernel_size=5)     #1@28x28 => 6@24x24
+        self.conv2 = nn.Conv2d(6, 16, kernel_size=3)    #6@12x12 => 16@10x10
+        self.fc1 = nn.Linear(400, 320)                  #16 x 5 x 5 = 400 => 320
+        self.fc2 = nn.Linear(320, 10)                   #320 => 10
+    def forward(self, x):
+        x = F.max_pool2d(F.relu(self.conv1(x)), 2)      #6@24x24 => 6@12x12
+        x = F.max_pool2d(F.relu(self.conv2(x)), 2)      #16@10x10 => 16@5x5
+        #print(x.shape)
+        x = x.view(-1, 400)
+        x = F.relu(self.fc1(x))
+        x = self.fc2(x)
+        return F.log_softmax(x, dim=1)
 
 model=Net()
 print(model)
@@ -89,8 +85,8 @@ def train(epoch):
     loss.backward()
     optimizer.step()
   print("epoch{}:終了\n".format(epoch))
-  
-  
+
+
   # 検証の設定
 def test():
   model.eval()
@@ -103,8 +99,8 @@ def test():
       correct += predicted.eq(targets.data.view_as(predicted)).sum()
   data_num = len(loader_test.dataset)
   print('\nテストデータの正解率：{}/{}({:.0f}%)\n'.format(correct, data_num, 100. * correct /data_num))
-  
-  
+
+
 # 学習前のテストデータ正解率
 test()
 
