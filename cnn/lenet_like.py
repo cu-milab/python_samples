@@ -13,9 +13,8 @@ import torch.nn.functional as F
 
 #デバイスの設定
 device = "cpu"
-
-#GPUを使用する場合は下記を実行
-#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#GPUを使用する場合には下記のコメントを解除
+#torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # 画像の読み込みと正規化
 X, y = fetch_openml('mnist_784', version=1, return_X_y=True)
@@ -52,18 +51,20 @@ class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         # nn.Conv2d(input_channel, out_channel, kernel, stride, padding)
-        self.conv1 = nn.Conv2d(1, 6, kernel_size=5)     #1@28x28 => 6@24x24
-        self.conv2 = nn.Conv2d(6, 16, kernel_size=3)    #6@12x12 => 16@10x10
-        self.fc1 = nn.Linear(400, 320)                  #16 x 5 x 5 = 400 => 320
-        self.fc2 = nn.Linear(320, 10)                   #320 => 10
+        self.conv1 = nn.Conv2d(1, 6, kernel_size=5)     #6@24x24
+        self.conv2 = nn.Conv2d(6, 16, kernel_size=3)    #16@10x10
+        self.fc1 = nn.Linear(400, 320)
+        self.fc2 = nn.Linear(320, 10)
     def forward(self, x):
-        x = F.max_pool2d(F.relu(self.conv1(x)), 2)      #6@24x24 => 6@12x12
-        x = F.max_pool2d(F.relu(self.conv2(x)), 2)      #16@10x10 => 16@5x5
+        x = F.max_pool2d(F.relu(self.conv1(x)), 2)     #6@12x12
+        x = F.max_pool2d(F.relu(self.conv2(x)), 2)      #16@5x5
         #print(x.shape)
         x = x.view(-1, 400)
         x = F.relu(self.fc1(x))
         x = self.fc2(x)
-        return F.log_softmax(x, dim=1)
+#        return F.log_softmax(x, dim=1)
+        return (x)
+
 
 model=Net()
 print(model)
