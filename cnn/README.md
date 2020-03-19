@@ -93,7 +93,6 @@ loader_test = DataLoader(ds_test, batch_size=64, shuffle=False)
 今回は全結合層(Full Connected = fc)は2層用意してます．
 1層目の全結合層は入力ユニットが400，出力ユニットが320，2層目の全結合層は入力ユニットが320，出力ユニットが10です．
 2層目の出力ユニットは分類クラス数と同じ数にする必要があるので注意してください．
-全結合層を経た後に
 
 ```
 class Net(nn.Module):
