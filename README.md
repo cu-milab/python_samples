@@ -17,3 +17,7 @@ Pythonによる画像処理のサンプルコードです．
 2020年12月19日に削除予定です．
 
 https://www.dropbox.com/s/nr1c7llfo35nnk8/20201209.pdf?dl=0
+
+### アップデートログ
+* /opencv/detection.py (2020.12.15)  
+OpenCV4.xの仕様変更に伴い修正。
